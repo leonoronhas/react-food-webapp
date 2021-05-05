@@ -1,36 +1,62 @@
+import { useState, useEffect } from "react";
 import Card from "../UI/Card";
 import MealItem from "../Meals/MealItem/MealItem";
 import classes from "./AvailableMeals.module.css";
-
-const DUMMY_MEALS = [
-  {
-    id: "m1",
-    name: "Sushi",
-    description: "Finest fish and veggies",
-    price: 22.99,
-  },
-  {
-    id: "m2",
-    name: "Schnitzel",
-    description: "A german specialty!",
-    price: 16.5,
-  },
-  {
-    id: "m3",
-    name: "Barbecue Burger",
-    description: "American, raw, meaty",
-    price: 12.99,
-  },
-  {
-    id: "m4",
-    name: "Green Bowl",
-    description: "Healthy...and green...",
-    price: 18.99,
-  },
-];
+import axios from "axios";
 
 const AvailableMeals = () => {
-  const mealsList = DUMMY_MEALS.map((meal) => {
+  const [meals, setMeals] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [httpError, setHttpError] = useState(null);
+
+  useEffect(() => {
+    const fetchMeals = async () => {
+      let res = null;
+      try {
+        res = await axios.get(
+          "https://react-food-app-fc2de-default-rtdb.firebaseio.com/meals.json"
+        );
+        const loadedMeals = [];
+
+        for (const key in res.data) {
+          loadedMeals.push({
+            id: key,
+            name: res.data[key].name,
+            description: res.data[key].description,
+            price: res.data[key].price,
+          });
+        }
+
+        setMeals(loadedMeals);
+        setIsLoading(false);
+      } catch (error) {
+        setIsLoading(false);
+        if (error.request.status === 0) {
+          setHttpError("Something went wrong!");
+        }
+      }
+    };
+
+    fetchMeals();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <section className={classes.MealsLoading}>
+        <p> LOADING...</p>
+      </section>
+    );
+  }
+
+  if (httpError) {
+    return (
+      <section className={classes.MealsLoading}>
+        <p>{httpError}</p>
+      </section>
+    );
+  }
+
+  const mealsList = meals.map((meal) => {
     return (
       <MealItem
         key={meal.id}
