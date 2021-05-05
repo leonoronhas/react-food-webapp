@@ -15,6 +15,10 @@
   margin: 1rem 0;
 }
 
+.textAlign {
+  text-align: center;
+}
+
 .actions {
   text-align: right;
 }
